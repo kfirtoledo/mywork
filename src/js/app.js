@@ -67,37 +67,39 @@ App = {
         $("#accountAddress").html("Your Account: " + account);
       }
     });
-
+    var id3 = 5;//web3.fromWei(web3.eth.getBalance(App.contracts.Lastpay.address),"ether").toString();
     // Load contract data
     App.contracts.Lastpay.deployed().then(function(instance) {
       electionInstance = instance;
-      return electionInstance.candidatesCount();
-    }).then(function(candidatesCount) {
+      var id4;
+      web3.eth.getBalance(electionInstance.address, 'latest', function(err, result) {
+        if (err != null) {
+            console.error("Error while retrieving the balance for address["+address+"]: "+err);
+        }
+
+        var balance = Number(web3.fromWei(result, "ether"));
+        id3= balance;
+        console.log("Balance for address["+electionInstance.address+"]="+balance);
+    });
+      return electionInstance.winner();
+    }).then(function(winner_inst) {
       var candidatesResults = $("#candidatesResults");
       candidatesResults.empty();
-
       var candidatesSelect = $('#candidatesSelect');
       candidatesSelect.empty();
+      var id= id3;
+      var name = winner_inst;
+      var voteCount = "top";
+      console.log("winner.addr "+name);
 
+  	// Render candidate Result
+          var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
+          candidatesResults.append(candidateTemplate);
 
-      //var id = web3.fromWei(web3.eth.getBalance(App.contracts.address),"ether").toString();
-      //var id=5;// = web3.eth.getBalance(electionInstance.address);
-    //  web3.eth.getBalance(electionInstance.address ,function (error, result) {
-      //  if (!error)
-        //}
-      //});
-      var id  = 5;
-      var name = 2;
-      var voteCount = 3;
+          // Render candidate ballot option
+          var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
+          candidatesSelect.append(candidateOption);
 
-      // Render candidate Result
-      var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
-
-      candidatesResults.append(candidateTemplate);
-
-      // Render candidate ballot option
-      var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
-      candidatesSelect.append(candidateOption);
       return electionInstance.voters(App.account);
     }).then(function(hasVoted) {
       // Do not allow a user to vote
@@ -109,7 +111,7 @@ App = {
     }).catch(function(error) {
       console.warn(error);
     });
- },
+  },
 
   castVote: function() {
     var candidateId = $('#candidatesSelect').val();
