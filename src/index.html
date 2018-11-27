@@ -21,7 +21,9 @@
     <div class="container" style="width: 650px;">
       <div class="row">
         <div class="col-lg-12">
-          <h1 class="text-center">FOMO contracts </h1>
+          <h1 class="text-center">
+              <a href="/" id="logo">FOMO contracts</a>
+           </h1>
           <hr/>
           <br/>
           <div id="loader">
@@ -32,23 +34,24 @@
               <thead>
                 <tr>
                   <th scope="col">Total Amounts</th>
-                  <th scope="col">Last Paying Addr</th>
-                  <th scope="col">Time to win</th>
+                  <th scope="col">Last paying Addr</th>
                 </tr>
               </thead>
               <tbody id="candidatesResults">
               </tbody>
             </table>
             <hr/>
-            <form onSubmit="App.payFound({accountAddress,value:web3.toWei(10,"ether")}); return false;">
-              <div class="form-group">
-                <label for="candidatesSelect">Select Candidate</label>
-                <select class="form-control" id="candidatesSelect">
-                </select>
-              </div>
-              <button type="submit" class="btn btn-primary">Vote</button>
+            <form onSubmit="App.payContract(); return false;">
+                <div style="text-align: center;">
+                  <button type="submit" class="btn btn-primary">Pay Contract </button>
+                  <input type="number" id="myNumber" value="5">
               <hr />
             </form>
+            <div style="text-align: center;">
+              <font size="6">
+              <p> <b> Time to Pay foundation in <span id="countdowntimer" > 60 </span> Seconds </b></p>
+              </font>
+            </div>
             <p id="accountAddress" class="text-center"></p>
           </div>
         </div>

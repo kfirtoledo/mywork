@@ -1,3 +1,5 @@
+var downloadTimer;
+
 App = {
   web3Provider: null,
   contracts: {},
@@ -18,6 +20,7 @@ App = {
       // Specify default instance if no web3 instance provided
       App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
       web3 = new Web3(App.web3Provider);
+      App.web3Provider.enable()
     }
     return App.initContract();
   },
@@ -29,31 +32,50 @@ App = {
       // Connect provider to interact with contract
       App.contracts.Lastpay.setProvider(App.web3Provider);
 
-      App.listenForEvents();
+      // get current block number in the block chain
+      var startBlockNumber;
+      web3.eth.getBlockNumber(function(err,  result){
+        startBlockNumber = result;
+        console.log("startBlockNumber ",startBlockNumber);
+      })
+      App.listenForEvents(startBlockNumber);
 
       return App.render();
     });
   },
 
   // Listen for events emitted from the contract
-  listenForEvents: function() {
+  listenForEvents: function(startBlock) {
     App.contracts.Lastpay.deployed().then(function(instance) {
       // Restart Chrome if you are unable to receive this event
       // This is a known issue with Metamask
       // https://github.com/MetaMask/metamask-extension/issues/2393
-      instance.votedEvent({}, {
-        fromBlock: 0,
+      instance.payEvent({}, {
+        fromBlock: startBlock,
         toBlock: 'latest'
       }).watch(function(error, event) {
-        console.log("event triggered", event)
+        console.log("event payEvent triggered", event)
+        //set timer again
+        clearInterval(downloadTimer);
+        App.timer();
         // Reload when a new vote is recorded
         App.render();
+
+      });
+      instance.timesUp({}, {
+        fromBlock: startBlock,
+        toBlock: 'latest'
+      }).watch(function(error, event) {
+          console.log("event timesUp triggered", event)
+          // Reload when a new vote is recorded
+          $('form').show();
+          App.render();
       });
     });
   },
 
   render: function() {
-    var electionInstance;
+    var fomoInstance;
     var loader = $("#loader");
     var content = $("#content");
 
@@ -67,45 +89,29 @@ App = {
         $("#accountAddress").html("Your Account: " + account);
       }
     });
-    var id3 = 5;//web3.fromWei(web3.eth.getBalance(App.contracts.Lastpay.address),"ether").toString();
+    var balance;
     // Load contract data
     App.contracts.Lastpay.deployed().then(function(instance) {
-      electionInstance = instance;
-      var id4;
-      web3.eth.getBalance(electionInstance.address, 'latest', function(err, result) {
+      fomoInstance = instance;
+      web3.eth.getBalance(fomoInstance.address, 'latest', function(err, result) {
         if (err != null) {
             console.error("Error while retrieving the balance for address["+address+"]: "+err);
         }
-
-        var balance = Number(web3.fromWei(result, "ether"));
-        id3= balance;
-        console.log("Balance for address["+electionInstance.address+"]="+balance);
+        var _balance = Number(web3.fromWei(result, "ether"));
+        balance= _balance;
+        console.log("Balance for address["+fomoInstance.address+"]="+ _balance);
     });
-      return electionInstance.winner();
+      return fomoInstance.winner();
     }).then(function(winner_inst) {
       var candidatesResults = $("#candidatesResults");
       candidatesResults.empty();
-      var candidatesSelect = $('#candidatesSelect');
-      candidatesSelect.empty();
-      var id= id3;
+
       var name = winner_inst;
-      var voteCount = "top";
       console.log("winner.addr "+name);
+    	// Render Last pay resual
+      var candidateTemplate = "<tr><th>" + balance + "</th><td>" + name + "</td><td>"
+      candidatesResults.append(candidateTemplate);
 
-  	// Render candidate Result
-          var candidateTemplate = "<tr><th>" + id + "</th><td>" + name + "</td><td>" + voteCount + "</td></tr>"
-          candidatesResults.append(candidateTemplate);
-
-          // Render candidate ballot option
-          var candidateOption = "<option value='" + id + "' >" + name + "</ option>"
-          candidatesSelect.append(candidateOption);
-
-      return electionInstance.voters(App.account);
-    }).then(function(hasVoted) {
-      // Do not allow a user to vote
-      if(hasVoted) {
-        $('form').hide();
-      }
       loader.hide();
       content.show();
     }).catch(function(error) {
@@ -113,19 +119,33 @@ App = {
     });
   },
 
-  castVote: function() {
-    var candidateId = $('#candidatesSelect').val();
+  payContract: function() {
     App.contracts.Lastpay.deployed().then(function(instance) {
-      return instance.vote(candidateId, { from: App.account });
+    var ammount =document.getElementById("myNumber").value;
+    return instance.payFound({from:App.account,value:web3.toWei(ammount,"ether")});
     }).then(function(result) {
-      // Wait for votes to update
+
+
       $("#content").hide();
       $("#loader").show();
     }).catch(function(err) {
       console.error(err);
     });
-  }
+  },
+  //timer -- call when payEvent is triggeres set timer to 60 sec
+  timer: function(time=60) {
+        var timeleft = time;
+        downloadTimer=setInterval(function(){
+        timeleft--;
+        document.getElementById("countdowntimer").textContent = timeleft;
+        if(timeleft <= 0 || window.stop == 1) {
+            clearInterval(downloadTimer);
+            $('form').hide();
+          }
+        },1000);
+}
 };
+
 
 $(function() {
   $(window).load(function() {
