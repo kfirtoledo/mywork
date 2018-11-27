@@ -2,21 +2,21 @@
 To Running this project on windows environment 
 ## Installing 
 ### Truffle 
-The full instructions can be find in this website:
+The full instructions can be find in this website: 
 http://www.dappuniversity.com/articles/the-ultimate-ethereum-dapp-tutorial
 but the important commands are:
 ```
 npm install -g truffle
 ```
 ### Ganache & Metamask & Node Package Manager (NPM)
-Install Ganache ,Metamask and NPM as describe in this tutorial
+Install Ganache ,Metamask and NPM as describe in this tutorial: 
 http://www.dappuniversity.com/articles/the-ultimate-ethereum-dapp-tutorial
 
 ## Oraclize and Etherium bridge
-To support Oraclize you need :
-1.install git
-2.install python 
-3.Run from administer power-shell (to avoid this error:https://github.com/freearhey/web-learn/issues/2)
+To support Oraclize you need : 
+1. install git 
+2. install python   
+3. Run from administer power-shell (to avoid this error:https://github.com/freearhey/web-learn/issues/2) 
 ```
 npm install --global --production windows-build-tools  
 ```
@@ -56,7 +56,7 @@ truffle.cmd migrate --reset --all
 and Thats It..
 
 ### running with Truffle console
-in addition we you run commands from the truffle console (using the same cmd window we deploy the contract)
+In addition you CAN run commands from the truffle console (using the same cmd window we deploy the contract)
 and run tuffle console:
 ```
 truffle.cmd console
