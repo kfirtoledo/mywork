@@ -26,11 +26,11 @@ App = {
   },
 
   initContract: function() {
-    $.getJSON("Lastpay.json", function(instance) {
+    $.getJSON("Fomo.json", function(instance) {
       // Instantiate a new truffle contract from the artifact
-      App.contracts.Lastpay = TruffleContract(instance);
+      App.contracts.Fomo = TruffleContract(instance);
       // Connect provider to interact with contract
-      App.contracts.Lastpay.setProvider(App.web3Provider);
+      App.contracts.Fomo.setProvider(App.web3Provider);
 
       // get current block number in the block chain
       var startBlockNumber;
@@ -46,7 +46,7 @@ App = {
 
   // Listen for events emitted from the contract
   listenForEvents: function(startBlock) {
-    App.contracts.Lastpay.deployed().then(function(instance) {
+    App.contracts.Fomo.deployed().then(function(instance) {
       // Restart Chrome if you are unable to receive this event
       // This is a known issue with Metamask
       // https://github.com/MetaMask/metamask-extension/issues/2393
@@ -62,11 +62,11 @@ App = {
         App.render();
 
       });
-      instance.timesUp({}, {
+      instance.WinnerAnnouncement({}, {
         fromBlock: startBlock,
         toBlock: 'latest'
       }).watch(function(error, event) {
-          console.log("event timesUp triggered", event)
+          console.log("event announceWinner triggered", event)
           // Reload when a new vote is recorded
           $('form').show();
           App.render();
@@ -91,7 +91,7 @@ App = {
     });
     var balance;
     // Load contract data
-    App.contracts.Lastpay.deployed().then(function(instance) {
+    App.contracts.Fomo.deployed().then(function(instance) {
       fomoInstance = instance;
       web3.eth.getBalance(fomoInstance.address, 'latest', function(err, result) {
         if (err != null) {
@@ -101,12 +101,12 @@ App = {
         balance= _balance;
         console.log("Balance for address["+fomoInstance.address+"]="+ _balance);
     });
-      return fomoInstance.winner();
-    }).then(function(winner_inst) {
+      return fomoInstance.lastPlayer();
+    }).then(function(lastPlayerInst) {
       var candidatesResults = $("#candidatesResults");
       candidatesResults.empty();
 
-      var name = winner_inst;
+      var name = lastPlayerInst;
       console.log("winner.addr "+name);
     	// Render Last pay resual
       var candidateTemplate = "<tr><th>" + balance + "</th><td>" + name + "</td><td>"
@@ -119,10 +119,10 @@ App = {
     });
   },
 
-  payContract: function() {
-    App.contracts.Lastpay.deployed().then(function(instance) {
+  buyTicketJs: function() {
+    App.contracts.Fomo.deployed().then(function(instance) {
     var ammount =document.getElementById("myNumber").value;
-    return instance.payFound({from:App.account,value:web3.toWei(ammount,"ether")});
+    return instance.buyTicket({from:App.account,value:web3.toWei(ammount,"ether")});
     }).then(function(result) {
 
 

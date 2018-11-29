@@ -1,5 +1,5 @@
-var Lastpay = artifacts.require("./Lastpay.sol");
+var Fomo = artifacts.require("./Fomo.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(Lastpay);
+  deployer.deploy(Fomo);
 };
